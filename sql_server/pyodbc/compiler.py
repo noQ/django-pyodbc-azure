@@ -12,6 +12,7 @@ from django.utils import six
 def _as_sql_agv(self, compiler, connection):
     return self.as_sql(compiler, connection, template='%(function)s(CONVERT(float, %(field)s))')
 
+
 def _as_sql_concatpair(self, compiler, connection):
     if connection.sql_server_version < 2012:
         node = self.coalesce()
@@ -19,8 +20,10 @@ def _as_sql_concatpair(self, compiler, connection):
     else:
         return self.as_sql(compiler, connection)
 
+
 def _as_sql_count(self, compiler, connection):
     return self.as_sql(compiler, connection, function='COUNT_BIG')
+
 
 def _as_sql_greatest(self, compiler, connection):
     # SQL Server does not provide GREATEST function,
@@ -29,6 +32,7 @@ def _as_sql_greatest(self, compiler, connection):
     template='(SELECT MAX(value) FROM (VALUES (%(expressions)s)) AS _%(function)s(value))'
     return self.as_sql(compiler, connection, arg_joiner='), (', template=template)
 
+
 def _as_sql_least(self, compiler, connection):
     # SQL Server does not provide LEAST function,
     # so we emulate it with a table value constructor
@@ -36,8 +40,10 @@ def _as_sql_least(self, compiler, connection):
     template='(SELECT MIN(value) FROM (VALUES (%(expressions)s)) AS _%(function)s(value))'
     return self.as_sql(compiler, connection, arg_joiner='), (', template=template)
 
+
 def _as_sql_length(self, compiler, connection):
     return self.as_sql(compiler, connection, function='LEN')
+
 
 def _as_sql_order_by(self, compiler, connection):
     template = None
@@ -47,16 +53,19 @@ def _as_sql_order_by(self, compiler, connection):
         template = 'CASE WHEN %(expression)s IS NULL THEN 0 ELSE 1 END, %(expression)s %(ordering)s'
     return self.as_sql(compiler, connection, template=template)
 
+
 def _as_sql_stddev(self, compiler, connection):
     function = 'STDEV'
     if self.function == 'STDDEV_POP':
         function = '%sP' % function
     return self.as_sql(compiler, connection, function=function)
 
+
 def _as_sql_substr(self, compiler, connection):
     if len(self.get_source_expressions()) < 3:
         self.get_source_expressions().append(Value(2**31-1))
     return self.as_sql(compiler, connection)
+
 
 def _as_sql_variance(self, compiler, connection):
     function = 'VAR'

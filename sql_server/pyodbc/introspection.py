@@ -70,11 +70,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         Checks whether column is Identity
         """
-        # COLUMNPROPERTY: http://msdn2.microsoft.com/en-us/library/ms174968.aspx
-
-        #from django.db import connection
-        #cursor.execute("SELECT COLUMNPROPERTY(OBJECT_ID(%s), %s, 'IsIdentity')",
-        #                 (connection.ops.quote_name(table_name), column_name))
         cursor.execute("SELECT COLUMNPROPERTY(OBJECT_ID(%s), %s, 'IsIdentity')",
                          (self.connection.ops.quote_name(table_name), column_name))
         return cursor.fetchall()[0][0]

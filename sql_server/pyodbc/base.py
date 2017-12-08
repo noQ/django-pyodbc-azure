@@ -387,18 +387,14 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             return True
 
     def schema_editor(self, *args, **kwargs):
-        "Returns a new instance of this backend's SchemaEditor"
         return DatabaseSchemaEditor(self, *args, **kwargs)
 
     @cached_property
     def sql_server_version(self):
-        with self.temporary_connection() as cursor:
-            cursor.execute("SELECT CAST(SERVERPROPERTY('ProductVersion') AS varchar)")
-            ver = cursor.fetchone()[0]
-            ver = int(ver.split('.')[0])
-            if not ver in self._sql_server_versions:
-                raise NotImplementedError('SQL Server v%d is not supported.' % ver)
-            return self._sql_server_versions[ver]
+        version = settings.SQL_SERVER_VERSION
+        if not version in self._sql_server_versions:
+            raise NotImplementedError('SQL Server v%d is not supported.' % version)
+        return self._sql_server_versions[version]
 
     @cached_property
     def to_azure_sql_db(self):
@@ -466,15 +462,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                               table_names)
 
     def disable_constraint_checking(self):
-        # Azure SQL Database doesn't support sp_msforeachtable
-        #cursor.execute('EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT ALL"')
         if not self.needs_rollback:
             self._execute_foreach('ALTER TABLE %s NOCHECK CONSTRAINT ALL')
         return not self.needs_rollback
 
     def enable_constraint_checking(self):
-        # Azure SQL Database doesn't support sp_msforeachtable
-        #cursor.execute('EXEC sp_msforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL"')
+
         if not self.needs_rollback:
             self.check_constraints()
 
